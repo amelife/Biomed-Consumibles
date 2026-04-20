@@ -3,15 +3,33 @@
 <!--
 ═══════════════════════════════════════════════════════════════════════════
 BIOMED MD Consumibles - Frontend
-Versión: 1.0.1
-Última actualización: 2026-04-20 17:50 ARG
+Versión: 1.2.0
+Última actualización: 2026-04-20 18:45 ARG
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Sistema de gestión de consumibles ZOLL de BIOMED MD">
 <meta name="theme-color" content="#0F172A">
+
+<!-- PWA / Add to Home Screen -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BIOMED MD">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="BIOMED MD Consumibles">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Favicons -->
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
 <title>BIOMED MD · Consumibles</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,16 +104,17 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .logo-biomed {
   text-align: center; margin-bottom: 28px;
 }
-.logo-biomed .brand {
-  font-family: 'Bebas Neue'; font-size: 48px; line-height: 1;
-  background: linear-gradient(135deg, var(--azul-700), var(--verde-600));
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 2px;
+.login-logo {
+  max-width: 240px; width: 100%; height: auto;
+  display: block; margin: 0 auto 8px;
+  background: #0F172A;
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
 }
 .logo-biomed .sub {
-  color: var(--gris-500); font-size: 13px; margin-top: 4px;
-  text-transform: uppercase; letter-spacing: 3px; font-weight: 600;
+  color: var(--gris-500); font-size: 12px; margin-top: 8px;
+  text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
 }
 .login-card h2 { font-size: 28px; color: var(--gris-900); margin-bottom: 6px; font-weight: 400; }
 .login-card p.hint { color: var(--gris-500); font-size: 13px; margin-bottom: 24px; }
@@ -152,6 +171,11 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .topbar .brand-small {
   font-family: 'Bebas Neue'; font-size: 24px; letter-spacing: 2px;
   display: flex; align-items: center; gap: 10px;
+}
+.topbar .topbar-logo {
+  height: 32px; width: auto; display: block;
+  background: rgba(255,255,255,0.08);
+  padding: 4px 6px; border-radius: 6px;
 }
 .topbar .brand-small .dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -459,19 +483,21 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 <div id="loginScreen">
   <div class="login-card">
     <div class="logo-biomed">
-      <div class="brand">BIOMED MD</div>
+      <img src="logo-biomed.png" alt="BIOMED MD" class="login-logo">
       <div class="sub">Consumibles</div>
     </div>
     <h2>Iniciar sesión</h2>
-    <p class="hint">Accedé con tu email y PIN de administrador.</p>
+    <p class="hint">Elegí tu usuario e ingresá tu PIN.</p>
     <div class="login-error" id="loginError"></div>
     <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="tu@biomedmd.com" autocomplete="email">
+      <label>Usuario</label>
+      <select id="loginUsuario">
+        <option value="">Cargando usuarios...</option>
+      </select>
     </div>
     <div class="form-group">
       <label>PIN</label>
-      <input type="password" id="loginPin" placeholder="••••" autocomplete="current-password" maxlength="10">
+      <input type="password" id="loginPin" placeholder="••••" autocomplete="current-password" maxlength="10" inputmode="numeric">
     </div>
     <label class="remember">
       <input type="checkbox" id="remember"> Recordarme en este dispositivo
@@ -486,8 +512,9 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 <div id="app">
   <header class="topbar">
     <div class="brand-small">
+      <img src="isotipo.png" alt="" class="topbar-logo">
+      <span>BIOMED MD · CONSUMIBLES</span>
       <span class="dot"></span>
-      BIOMED MD · CONSUMIBLES
     </div>
     <div class="user-info">
       <div class="avatar" id="userAvatar">–</div>
@@ -633,18 +660,37 @@ async function api(action, params = {}) {
 // ═══════════════════════════════════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════════════════════════════════
+async function cargarUsuarios() {
+  const sel = document.getElementById('loginUsuario');
+  const r = await api('listarUsuariosActivos', {});
+  if (!r.ok || !r.data.length) {
+    sel.innerHTML = '<option value="">(Sin usuarios cargados)</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">Seleccioná tu usuario...</option>' +
+    r.data.map(u => `<option value="${u.usuario}">${u.nombre}</option>`).join('');
+
+  // Pre-seleccionar si hay uno guardado
+  const saved = localStorage.getItem('biomed_last_user');
+  if (saved && r.data.find(u => u.usuario === saved)) {
+    sel.value = saved;
+    document.getElementById('loginPin').focus();
+  }
+}
+
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
+  const usuario = document.getElementById('loginUsuario').value.trim();
   const pin = document.getElementById('loginPin').value.trim();
-  if (!email || !pin) { showLoginError('Completá email y PIN'); return; }
+  if (!usuario || !pin) { showLoginError('Seleccioná usuario e ingresá PIN'); return; }
 
   setLoadingLogin(true);
-  const res = await api('login', { email, pin });
+  const res = await api('login', { usuario, pin });
   setLoadingLogin(false);
 
   if (!res.ok) { showLoginError(res.error || 'Credenciales inválidas'); return; }
 
   state.usuario = res.usuario;
+  localStorage.setItem('biomed_last_user', res.usuario.usuario); // recordar solo el nombre, no el PIN
   if (document.getElementById('remember').checked) {
     localStorage.setItem('biomed_user', JSON.stringify(res.usuario));
   }
@@ -667,7 +713,7 @@ async function entrarApp() {
   const u = state.usuario;
   document.getElementById('userName').textContent = u.nombre;
   document.getElementById('userRol').textContent = u.rol === 'super_admin' ? 'Super Admin' : 'Admin';
-  document.getElementById('userAvatar').textContent = u.nombre.substring(0, 2).toUpperCase();
+  document.getElementById('userAvatar').textContent = (u.nombre || u.usuario).substring(0, 2).toUpperCase();
   await cargarDataInicial();
 }
 
@@ -985,7 +1031,7 @@ async function guardarCliente(id) {
     ciudad: document.getElementById('m_ciudad').value.trim(),
     provincia: document.getElementById('m_prov').value.trim(),
     notas: document.getElementById('m_notas').value.trim(),
-    adminEmail: state.usuario.email
+    adminEmail: state.usuario.usuario
   };
   if (!params.razonSocial) { toast('Razón Social requerida', 'error'); return; }
   const r = await api(id ? 'editarCliente' : 'crearCliente', params);
@@ -1037,7 +1083,7 @@ async function guardarEquipo(id) {
     fechaInstalacion: document.getElementById('m_finst').value,
     ubicacionSitio: document.getElementById('m_ubic').value.trim(),
     notas: document.getElementById('m_notas_eq').value.trim(),
-    adminEmail: state.usuario.email
+    adminEmail: state.usuario.usuario
   };
   if (!params.clienteID) { toast('Seleccioná cliente', 'error'); return; }
   const r = await api(id ? 'editarEquipo' : 'crearEquipo', params);
@@ -1102,7 +1148,7 @@ async function guardarConsumible(equipoID) {
     fechaVencimiento: document.getElementById('m_fvenc').value || null,
     notas: document.getElementById('m_notas_con').value.trim(),
     descontarStock: document.getElementById('m_descontar').checked,
-    adminEmail: state.usuario.email
+    adminEmail: state.usuario.usuario
   };
   const r = await api('crearConsumible', params);
   if (r.ok) { toast('✅ Consumible agregado', 'success'); closeModal(); await refrescar(); }
@@ -1171,7 +1217,7 @@ async function confirmarReemplazo(idViejo) {
     fechaInstalacion: document.getElementById('r_finst').value,
     notas: document.getElementById('r_notas').value.trim(),
     descontarStock: document.getElementById('r_descontar').checked,
-    adminEmail: state.usuario.email
+    adminEmail: state.usuario.usuario
   };
   const r = await api('reemplazarConsumible', params);
   if (r.ok) { toast('✅ Reemplazo registrado', 'success'); closeModal(); await refrescar(); }
@@ -1203,7 +1249,7 @@ async function guardarMovimiento(tipo) {
     codigoZOLL: document.getElementById('mv_cod').value,
     cantidad: document.getElementById('mv_cant').value,
     notas: document.getElementById('mv_notas').value.trim(),
-    adminEmail: state.usuario.email
+    adminEmail: state.usuario.usuario
   };
   if (!params.cantidad || params.cantidad < 1) { toast('Cantidad inválida', 'error'); return; }
   const r = await api('movimientoStock', params);
@@ -1272,14 +1318,23 @@ function formatFechaISO(v) {
 // AUTO-LOGIN
 // ═══════════════════════════════════════════════════════════════════════════
 (function init() {
+  cargarUsuarios();
+
   const saved = localStorage.getItem('biomed_user');
   if (saved) {
     try {
       state.usuario = JSON.parse(saved);
-      entrarApp();
+      if (state.usuario && state.usuario.usuario) {
+        entrarApp();
+      } else {
+        localStorage.removeItem('biomed_user');
+      }
     } catch { localStorage.removeItem('biomed_user'); }
   }
   document.getElementById('loginPin').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginUsuario').addEventListener('change', () => {
+    document.getElementById('loginPin').focus();
+  });
 })();
 </script>
 
