@@ -3,8 +3,8 @@
 <!--
 ═══════════════════════════════════════════════════════════════════════════
 BIOMED MD Consumibles - Frontend
-Versión: 1.4.2
-Última actualización: 2026-04-20 21:15 ARG
+Versión: 1.4.3
+Última actualización: 2026-04-20 21:45 ARG
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <head>
@@ -502,6 +502,33 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 }
 .toast.success { background: var(--verde-600); }
 .toast.error { background: var(--rojo-600); }
+
+/* Loading overlay */
+#loadingOverlay {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.15s ease;
+}
+#loadingOverlay .box {
+  background: white; padding: 28px 36px; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); text-align: center;
+  min-width: 260px; max-width: 380px;
+}
+#loadingOverlay .spinner {
+  width: 44px; height: 44px; margin: 0 auto 16px;
+  border: 4px solid var(--azul-50); border-top-color: var(--azul-600);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+#loadingOverlay .titulo {
+  font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 1px;
+  color: var(--gris-900); margin-bottom: 4px;
+}
+#loadingOverlay .mensaje {
+  color: var(--gris-600); font-size: 13px; line-height: 1.5;
+}
 .empty {
   text-align: center; padding: 40px 20px; color: var(--gris-500);
 }
@@ -756,7 +783,9 @@ async function entrarApp() {
   document.getElementById('userName').textContent = u.nombre;
   document.getElementById('userRol').textContent = u.rol === 'super_admin' ? 'Super Admin' : 'Admin';
   document.getElementById('userAvatar').textContent = (u.nombre || u.usuario).substring(0, 2).toUpperCase();
+  showLoading('Cargando datos', 'Trayendo clientes, equipos y consumibles...');
   await cargarDataInicial();
+  hideLoading();
 }
 
 function logout() {
@@ -1054,7 +1083,11 @@ function openModalCliente(data) {
       <div class="form-group"><label>Razón Social *</label><input id="m_razon" value="${c.RazonSocial || ''}"></div>
       <div class="form-group"><label>Contacto</label><input id="m_contacto" value="${c.NombreContacto || ''}"></div>
       <div class="form-group"><label>Email</label><input id="m_email" type="email" value="${c.Email || ''}"></div>
-      <div class="form-group"><label>Teléfono</label><input id="m_tel" value="${c.Telefono || ''}"></div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input id="m_tel" value="${c.Telefono || ''}" placeholder="11 2392 4985" inputmode="tel">
+        <small style="color: var(--gris-500); font-size: 11px;">💡 Ingresá el número tal cual (con o sin código de país). El sistema lo normaliza automáticamente.</small>
+      </div>
       <div class="form-group"><label>Dirección</label><input id="m_dir" value="${c.Direccion || ''}"></div>
       <div class="form-group"><label>Ciudad / Provincia</label>
         <div style="display:flex; gap:8px;">
@@ -1085,12 +1118,15 @@ async function guardarCliente(id) {
     adminEmail: state.usuario.usuario
   };
   if (!params.razonSocial) { toast('Razón Social requerida', 'error'); return; }
+  showLoading(id ? 'Actualizando cliente' : 'Creando cliente', 'Guardando en la base de datos...');
   const r = await api(id ? 'editarCliente' : 'crearCliente', params);
   if (r.ok) {
-    toast(id ? '✅ Cliente actualizado' : '✅ Cliente creado', 'success');
     closeModal();
     await refrescar();
+    hideLoading();
+    toast(id ? '✅ Cliente actualizado' : '✅ Cliente creado', 'success');
   } else {
+    hideLoading();
     toast(r.error || 'Error', 'error');
   }
 }
@@ -1137,9 +1173,17 @@ async function guardarEquipo(id) {
     adminEmail: state.usuario.usuario
   };
   if (!params.clienteID) { toast('Seleccioná cliente', 'error'); return; }
+  showLoading(id ? 'Actualizando equipo' : 'Creando equipo', 'Guardando en la base de datos...');
   const r = await api(id ? 'editarEquipo' : 'crearEquipo', params);
-  if (r.ok) { toast('✅ Guardado', 'success'); closeModal(); await refrescar(); }
-  else toast(r.error || 'Error', 'error');
+  if (r.ok) {
+    closeModal();
+    await refrescar();
+    hideLoading();
+    toast('✅ Guardado', 'success');
+  } else {
+    hideLoading();
+    toast(r.error || 'Error', 'error');
+  }
 }
 
 function editarEquipo(id) {
@@ -1364,6 +1408,8 @@ async function guardarConsumible() {
   btn.disabled = true;
   btn.innerHTML = '<span class="loading"></span> Guardando...';
 
+  showLoading('Cargando consumible', 'Calculando vencimiento y guardando...');
+
   const params = {
     clienteID,
     equipoID,
@@ -1382,6 +1428,7 @@ async function guardarConsumible() {
   btn.innerHTML = txtOriginal;
 
   if (!r.ok) {
+    hideLoading();
     toast('❌ ' + (r.error || 'Error al guardar'), 'error');
     return;
   }
@@ -1431,6 +1478,7 @@ async function guardarConsumible() {
     </div>
   `);
 
+  hideLoading();
   await refrescar();
 }
 
@@ -1641,7 +1689,9 @@ async function refrescar() {
 async function refrescarManual() {
   const btn = document.querySelector('.btn-refresh');
   if (btn) btn.classList.add('spinning');
+  showLoading('Actualizando', 'Recargando datos del sistema...');
   await refrescar();
+  hideLoading();
   if (btn) btn.classList.remove('spinning');
   toast('✅ Datos actualizados', 'success');
 }
@@ -1650,6 +1700,27 @@ function showModal(html) {
   document.getElementById('modalContainer').innerHTML = `<div class="modal-bg" onclick="if(event.target===this) closeModal()"><div class="modal">${html}</div></div>`;
 }
 function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
+
+function showLoading(titulo, mensaje) {
+  let el = document.getElementById('loadingOverlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loadingOverlay';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div class="box">
+      <div class="spinner"></div>
+      <div class="titulo">${titulo || 'Procesando...'}</div>
+      <div class="mensaje">${mensaje || 'Un momento por favor'}</div>
+    </div>
+  `;
+  el.style.display = 'flex';
+}
+function hideLoading() {
+  const el = document.getElementById('loadingOverlay');
+  if (el) el.remove();
+}
 
 function toast(msg, type = '') {
   const t = document.createElement('div');
