@@ -3,8 +3,8 @@
 <!--
 ═══════════════════════════════════════════════════════════════════════════
 BIOMED MD Consumibles - Frontend
-Versión: 1.2.0
-Última actualización: 2026-04-20 18:45 ARG
+Versión: 1.3.0
+Última actualización: 2026-04-20 19:45 ARG
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <head>
@@ -352,6 +352,15 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   background: white; border-radius: var(--radius); padding: 18px;
   box-shadow: var(--shadow); border: 1px solid var(--gris-100); margin-bottom: 12px;
 }
+.equipo-card.es-suelto {
+  border-style: dashed;
+  border-color: var(--naranja-500);
+  background: #FFFBEB;
+}
+.modelo-tag.suelto-tag {
+  background: #FEF3C7;
+  color: var(--naranja-600);
+}
 .equipo-card .hdr {
   display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
 }
@@ -383,7 +392,29 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .consumible-tile .name { font-weight: 700; font-size: 13px; }
 .consumible-tile .venc { font-size: 11px; color: var(--gris-500); }
 
-/* ═══════ STOCK ═══════ */
+/* ═══════ TIPO SELECTOR (Nuevo ítem) ═══════ */
+.tipo-selector {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+@media (max-width: 500px) { .tipo-selector { grid-template-columns: 1fr; } }
+.tipo-card {
+  background: var(--gris-50); border: 2px solid var(--gris-200);
+  border-radius: var(--radius); padding: 24px 16px;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+  font-family: inherit; display: flex; flex-direction: column; gap: 8px;
+}
+.tipo-card:hover {
+  background: var(--azul-50); border-color: var(--azul-600);
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
+}
+.tipo-card .tipo-emoji { font-size: 40px; line-height: 1; }
+.tipo-card .tipo-titulo {
+  font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 1px;
+  color: var(--gris-900);
+}
+.tipo-card .tipo-desc {
+  font-size: 12px; color: var(--gris-600); line-height: 1.4;
+}
 .stock-table {
   width: 100%; border-collapse: separate; border-spacing: 0;
   background: white; border-radius: var(--radius); overflow: hidden;
@@ -578,7 +609,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
         <select class="search-input" id="filterCliente" style="max-width:240px;">
           <option value="">Todos los clientes</option>
         </select>
-        <button class="btn btn-primary" onclick="openModalEquipo()">➕ Nuevo equipo</button>
+        <button class="btn btn-primary" onclick="openModalNuevoItem()">➕ Nuevo ítem</button>
       </div>
       <div id="equiposList"></div>
     </section>
@@ -635,6 +666,7 @@ const state = {
   dashboard: null,
   clientes: [],
   equipos: [],
+  sueltos: [],
   stock: [],
   catalogo: {},
   modelos: []
@@ -731,6 +763,7 @@ async function cargarDataInicial() {
   state.dashboard = r.dashboard;
   state.clientes = r.clientes;
   state.equipos = r.equipos;
+  state.sueltos = r.sueltos || [];
   state.stock = r.stock;
   state.catalogo = r.catalogo;
   state.modelos = r.modelos;
@@ -888,25 +921,31 @@ function verCliente(id) {
 function renderEquipos() {
   const q = (document.getElementById('searchEquipos')?.value || '').toLowerCase();
   const filtroCli = document.getElementById('filterCliente')?.value || '';
-  const data = state.equipos.filter(e => {
+
+  // Combinar equipos reales + pseudo-equipos de consumibles sueltos
+  const todos = [...state.equipos, ...state.sueltos];
+
+  const data = todos.filter(e => {
     if (filtroCli && e.ClienteID !== filtroCli) return false;
-    if (q && !(e.Modelo + e.NumeroSerie + e.cliente + (e.UbicacionSitio || '')).toLowerCase().includes(q)) return false;
+    if (q && !((e.Modelo || '') + (e.NumeroSerie || '') + (e.cliente || '') + (e.UbicacionSitio || '')).toLowerCase().includes(q)) return false;
     return true;
   });
   const cont = document.getElementById('equiposList');
   if (!data.length) {
-    cont.innerHTML = '<div class="empty"><div class="ico">🫀</div>Sin equipos. Creá el primero!</div>';
+    cont.innerHTML = '<div class="empty"><div class="ico">🫀</div>Sin equipos ni consumibles sueltos. Creá el primer ítem!</div>';
     return;
   }
-  cont.innerHTML = data.map(e => `
-    <div class="equipo-card">
+  cont.innerHTML = data.map(e => {
+    const esSuelto = e.esSuelto === true;
+    return `
+    <div class="equipo-card ${esSuelto ? 'es-suelto' : ''}">
       <div class="hdr">
-        <span class="modelo-tag">${e.Modelo}</span>
-        <span class="serie">S/N: ${e.NumeroSerie || '-'}</span>
+        <span class="modelo-tag ${esSuelto ? 'suelto-tag' : ''}">${e.Modelo}</span>
+        ${!esSuelto ? `<span class="serie">S/N: ${e.NumeroSerie || '-'}</span>` : ''}
         ${e.UbicacionSitio ? '<span style="font-size:12px; color:var(--gris-600);">📍 ' + e.UbicacionSitio + '</span>' : ''}
         <span class="cliente-ref">🏥 ${e.cliente}</span>
-        <button class="btn btn-sm btn-secondary" onclick="openModalConsumible('${e.ID}')">➕ Agregar consumible</button>
-        <button class="btn btn-sm btn-secondary" onclick="editarEquipo('${e.ID}')">✏️</button>
+        ${!esSuelto ? `<button class="btn btn-sm btn-secondary" onclick="openModalConsumible('${e.ID}', '${e.ClienteID}')">➕ Consumible</button>` : `<button class="btn btn-sm btn-secondary" onclick="openModalConsumibleSuelto('${e.ClienteID}')">➕ Otro suelto</button>`}
+        ${!esSuelto ? `<button class="btn btn-sm btn-secondary" onclick="editarEquipo('${e.ID}')">✏️</button>` : ''}
       </div>
       <div class="consumibles-grid">
         ${(e.consumibles || []).length === 0 ?
@@ -924,7 +963,8 @@ function renderEquipos() {
         }
       </div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 document.addEventListener('input', e => { if (e.target.id === 'searchEquipos') renderEquipos(); });
 document.addEventListener('change', e => { if (e.target.id === 'filterCliente') renderEquipos(); });
@@ -1096,22 +1136,131 @@ function editarEquipo(id) {
   if (e) openModalEquipo(e);
 }
 
-function openModalConsumible(equipoID) {
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL SELECTOR "NUEVO ÍTEM"
+// ═══════════════════════════════════════════════════════════════════════════
+function openModalNuevoItem() {
+  if (!state.clientes.length) {
+    toast('Primero cargá al menos un cliente', 'error');
+    document.querySelector('[data-tab="clientes"]').click();
+    return;
+  }
+  showModal(`
+    <div class="modal-header">
+      <h3>➕ Nuevo ítem</h3>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--gris-600); margin-bottom:16px; font-size:13px;">Elegí qué tipo de ítem querés cargar:</p>
+      <div class="tipo-selector">
+        <button class="tipo-card" onclick="cerrarYAbrir('equipo')">
+          <div class="tipo-emoji">🫀</div>
+          <div class="tipo-titulo">EQUIPO (DEA)</div>
+          <div class="tipo-desc">Cargar un nuevo desfibrilador con su número de serie y ubicación</div>
+        </button>
+        <button class="tipo-card" onclick="cerrarYAbrir('consumible')">
+          <div class="tipo-emoji">📦</div>
+          <div class="tipo-titulo">CONSUMIBLE</div>
+          <div class="tipo-desc">Cargar un electrodo o batería, opcionalmente asociado a un equipo</div>
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+function cerrarYAbrir(tipo) {
+  closeModal();
+  // Delay chico para que el DOM del modal anterior se limpie antes de abrir el nuevo
+  setTimeout(() => {
+    if (tipo === 'equipo') openModalEquipo();
+    else openModalConsumibleSuelto();
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL CONSUMIBLE - UNIFICADO
+// Soporta: equipoID ya conocido, clienteID ya conocido, o ambos vacíos (elige desde 0)
+// ═══════════════════════════════════════════════════════════════════════════
+function openModalConsumible(equipoID, clienteID) {
+  abrirModalConsumible({
+    equipoID: equipoID || '',
+    clienteID: clienteID || '',
+    permitirCambiarCliente: false
+  });
+}
+
+function openModalConsumibleSuelto(clienteID) {
+  abrirModalConsumible({
+    equipoID: '',
+    clienteID: clienteID || '',
+    permitirCambiarCliente: !clienteID
+  });
+}
+
+function abrirModalConsumible(opts) {
+  const { equipoID, clienteID, permitirCambiarCliente } = opts;
+
   const catalogoOpts = Object.keys(state.catalogo).map(cod => {
     const c = state.catalogo[cod];
     return `<option value="${cod}">${c.emoji} ${c.nombre} (${cod})</option>`;
   }).join('');
+
+  const clientesOpts = '<option value="">-- Seleccionar cliente --</option>' +
+    state.clientes.map(c => `<option value="${c.ID}" ${c.ID === clienteID ? 'selected' : ''}>${c.RazonSocial}</option>`).join('');
+
+  // Si vino con equipoID, mostrarlo pero readonly
+  let selectorClienteHTML = '';
+  let selectorEquipoHTML = '';
+
+  if (equipoID) {
+    const eq = state.equipos.find(x => x.ID === equipoID);
+    selectorClienteHTML = `
+      <div class="form-group">
+        <label>Cliente</label>
+        <input value="${eq ? eq.cliente : ''}" disabled style="background:var(--gris-50); color:var(--gris-600);">
+        <input type="hidden" id="m_cliente_c" value="${eq ? eq.ClienteID : clienteID}">
+      </div>
+    `;
+    selectorEquipoHTML = `
+      <div class="form-group">
+        <label>Equipo</label>
+        <input value="${eq ? eq.Modelo + ' · S/N ' + (eq.NumeroSerie || '-') : ''}" disabled style="background:var(--gris-50); color:var(--gris-600);">
+        <input type="hidden" id="m_equipo_c" value="${equipoID}">
+      </div>
+    `;
+  } else {
+    selectorClienteHTML = `
+      <div class="form-group">
+        <label>Cliente *</label>
+        <select id="m_cliente_c" onchange="actualizarEquiposDeCliente()" ${!permitirCambiarCliente && clienteID ? 'disabled style="background:var(--gris-50);"' : ''}>
+          ${clientesOpts}
+        </select>
+      </div>
+    `;
+    selectorEquipoHTML = `
+      <div class="form-group">
+        <label>Equipo (opcional)</label>
+        <select id="m_equipo_c">
+          <option value="">📦 Sin equipo (suelto / stock del cliente)</option>
+        </select>
+        <small style="color:var(--gris-500); font-size:12px;">Si no asociás a un equipo, queda como consumible suelto del cliente.</small>
+      </div>
+    `;
+  }
+
   showModal(`
     <div class="modal-header">
       <h3>➕ Nuevo consumible</h3>
       <button class="close-btn" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
+      ${selectorClienteHTML}
+      ${selectorEquipoHTML}
       <div class="form-group"><label>Producto *</label>
         <select id="m_codigo" onchange="previewVencimiento()">${catalogoOpts}</select>
       </div>
       <div class="form-group"><label>Lote / Serie</label><input id="m_lote"></div>
-      <div class="form-group"><label>Fecha de instalación</label>
+      <div class="form-group"><label>Fecha de instalación / venta</label>
         <input id="m_finst_c" type="date" value="${new Date().toISOString().substring(0,10)}" onchange="previewVencimiento()">
       </div>
       <div class="form-group"><label>Fecha de vencimiento (override manual opcional)</label>
@@ -1123,10 +1272,20 @@ function openModalConsumible(equipoID) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarConsumible('${equipoID}')">💾 Guardar</button>
+      <button class="btn btn-primary" onclick="guardarConsumible()">💾 Guardar</button>
     </div>
   `);
   previewVencimiento();
+  if (!equipoID && clienteID) actualizarEquiposDeCliente();
+}
+
+function actualizarEquiposDeCliente() {
+  const cli = document.getElementById('m_cliente_c').value;
+  const sel = document.getElementById('m_equipo_c');
+  if (!sel) return;
+  const eqs = state.equipos.filter(e => e.ClienteID === cli);
+  sel.innerHTML = '<option value="">📦 Sin equipo (suelto / stock del cliente)</option>' +
+    eqs.map(e => `<option value="${e.ID}">${e.Modelo} · S/N ${e.NumeroSerie || '-'}</option>`).join('');
 }
 
 function previewVencimiento() {
@@ -1139,8 +1298,14 @@ function previewVencimiento() {
   document.getElementById('m_preview').textContent = `Vence el ${d.toLocaleDateString('es-AR')} (${cat.vidaUtilMeses / 12} años desde instalación)`;
 }
 
-async function guardarConsumible(equipoID) {
+async function guardarConsumible() {
+  const clienteID = document.getElementById('m_cliente_c').value;
+  const equipoID = document.getElementById('m_equipo_c').value;
+
+  if (!clienteID && !equipoID) { toast('Seleccioná cliente o equipo', 'error'); return; }
+
   const params = {
+    clienteID,
     equipoID,
     codigoZOLL: document.getElementById('m_codigo').value,
     lote: document.getElementById('m_lote').value.trim(),
@@ -1155,9 +1320,10 @@ async function guardarConsumible(equipoID) {
   else toast(r.error || 'Error', 'error');
 }
 
-function verConsumible(id, equipoID) {
-  const eq = state.equipos.find(e => e.ID === equipoID);
-  const c = (eq?.consumibles || []).find(x => x.ID === id);
+function verConsumible(id, equipoOSueltoID) {
+  // Buscar tanto en equipos reales como en sueltos
+  const fuente = [...state.equipos, ...state.sueltos].find(e => e.ID === equipoOSueltoID);
+  const c = (fuente?.consumibles || []).find(x => x.ID === id);
   if (!c) return;
 
   const cat = state.catalogo[c.CodigoZOLL] || {};
@@ -1275,6 +1441,7 @@ async function refrescar() {
   state.dashboard = r.dashboard;
   state.clientes = r.clientes;
   state.equipos = r.equipos;
+  state.sueltos = r.sueltos || [];
   state.stock = r.stock;
   renderDashboard();
   renderClientes();
