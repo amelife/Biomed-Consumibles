@@ -3,8 +3,8 @@
 <!--
 ═══════════════════════════════════════════════════════════════════════════
 BIOMED MD Consumibles - Frontend
-Versión: 1.4.3
-Última actualización: 2026-04-20 21:45 ARG
+Versión: 1.4.4
+Última actualización: 2026-04-20 22:15 ARG
 ═══════════════════════════════════════════════════════════════════════════
 -->
 <head>
@@ -35,7 +35,8 @@ Versión: 1.4.3
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
+/* ═══════ TEMAS ═══════ */
+:root, [data-theme="claro"] {
   --azul-900: #0F172A;
   --azul-800: #1E293B;
   --azul-700: #1E3A8A;
@@ -65,6 +66,14 @@ Versión: 1.4.3
   --gris-50:  #F9FAFB;
   --bg: #F5F7FB;
   --card: #FFFFFF;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  --topbar-grad-1: #0F172A;
+  --topbar-grad-2: #1E3A8A;
+  --accent: #2563EB;
+  --accent-text: #1E3A8A;
+  --accent-50: #EFF6FF;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
   --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
   --shadow-md: 0 4px 6px -1px rgba(15,23,42,0.1), 0 2px 4px -1px rgba(15,23,42,0.06);
@@ -74,15 +83,91 @@ Versión: 1.4.3
   --radius-lg: 16px;
 }
 
+[data-theme="oscuro"] {
+  --bg: #0B1220;
+  --card: #1A2234;
+  --text: #F3F4F6;
+  --text-muted: #9CA3AF;
+  --border: #2D3748;
+  --gris-50:  #1E293B;
+  --gris-100: #252F40;
+  --gris-200: #2D3748;
+  --gris-300: #4B5563;
+  --gris-400: #6B7280;
+  --gris-500: #9CA3AF;
+  --gris-600: #D1D5DB;
+  --gris-700: #E5E7EB;
+  --gris-800: #F3F4F6;
+  --gris-900: #F9FAFB;
+  --topbar-grad-1: #0A0F1C;
+  --topbar-grad-2: #0F172A;
+  --accent: #3B82F6;
+  --accent-text: #60A5FA;
+  --accent-50: #1E3A8A;
+  --azul-50: #1E3A8A;
+  --rojo-50: #451A1A;
+  --verde-50: #064E3B;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.3);
+}
+
+[data-theme="verde"] {
+  --bg: #F0FDF4;
+  --card: #FFFFFF;
+  --text: #052E16;
+  --text-muted: #4B5563;
+  --border: #D1FAE5;
+  --topbar-grad-1: #064E3B;
+  --topbar-grad-2: #047857;
+  --accent: #059669;
+  --accent-text: #047857;
+  --accent-50: #ECFDF5;
+  --azul-700: #065F46;
+  --azul-600: #059669;
+  --azul-50:  #ECFDF5;
+  --shadow-sm: 0 1px 2px rgba(6, 78, 59, 0.05);
+  --shadow: 0 1px 3px rgba(6,78,59,0.08), 0 1px 2px rgba(6,78,59,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(6,78,59,0.1), 0 2px 4px -1px rgba(6,78,59,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(6,78,59,0.1), 0 4px 6px -2px rgba(6,78,59,0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --bg: #0B1220;
+    --card: #1A2234;
+    --text: #F3F4F6;
+    --text-muted: #9CA3AF;
+    --border: #2D3748;
+    --gris-50:  #1E293B;
+    --gris-100: #252F40;
+    --gris-200: #2D3748;
+    --gris-300: #4B5563;
+    --gris-400: #6B7280;
+    --gris-500: #9CA3AF;
+    --gris-600: #D1D5DB;
+    --gris-700: #E5E7EB;
+    --gris-800: #F3F4F6;
+    --gris-900: #F9FAFB;
+    --topbar-grad-1: #0A0F1C;
+    --topbar-grad-2: #0F172A;
+    --azul-50: #1E3A8A;
+    --rojo-50: #451A1A;
+    --verde-50: #064E3B;
+  }
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   font-family: 'Barlow', -apple-system, sans-serif;
   background: var(--bg);
-  color: var(--gris-900);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
   line-height: 1.5;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 h1, h2, h3, h4 { font-family: 'Bebas Neue', 'Barlow', sans-serif; letter-spacing: 0.5px; }
@@ -96,7 +181,7 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   z-index: 9999; padding: 20px;
 }
 .login-card {
-  background: white; padding: 40px 32px; border-radius: var(--radius-lg);
+  background: var(--card); padding: 40px 32px; border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg); width: 100%; max-width: 420px;
   animation: slideUp 0.4s ease;
 }
@@ -126,7 +211,7 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .form-group input, .form-group select, .form-group textarea {
   width: 100%; padding: 12px 14px; border: 1.5px solid var(--gris-200);
   border-radius: var(--radius-sm); font-family: inherit; font-size: 14px;
-  transition: all 0.2s; background: white;
+  transition: all 0.2s; background: var(--card);
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
   outline: none; border-color: var(--azul-600);
@@ -163,7 +248,7 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 /* ═══════ APP LAYOUT ═══════ */
 #app { display: none; min-height: 100vh; }
 .topbar {
-  background: linear-gradient(135deg, var(--azul-900), var(--azul-700));
+  background: linear-gradient(135deg, var(--topbar-grad-1), var(--topbar-grad-2));
   color: white; padding: 14px 24px;
   display: flex; align-items: center; justify-content: space-between;
   box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100;
@@ -201,19 +286,46 @@ code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .topbar .btn-refresh.spinning { animation: rotate 0.8s linear infinite; }
 @keyframes rotate { to { transform: rotate(360deg); } }
 
+.theme-switcher {
+  display: flex; gap: 2px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 3px; border-radius: 10px;
+  margin-right: 4px;
+}
+.theme-switcher .theme-btn {
+  background: transparent; border: none;
+  width: 30px; height: 28px; padding: 0;
+  font-size: 14px; cursor: pointer;
+  border-radius: 6px; color: white;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+}
+.theme-switcher .theme-btn:hover {
+  background: rgba(255,255,255,0.12);
+}
+.theme-switcher .theme-btn.active {
+  background: rgba(255,255,255,0.2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+}
+@media (max-width: 600px) {
+  .theme-switcher .theme-btn { width: 26px; height: 24px; font-size: 12px; }
+}
+
 .tabs-nav {
-  background: white; display: flex; gap: 4px;
-  padding: 0 24px; border-bottom: 1px solid var(--gris-200);
+  background: var(--card); display: flex; gap: 4px;
+  padding: 0 24px; border-bottom: 1px solid var(--border);
   overflow-x: auto; position: sticky; top: 56px; z-index: 90;
+  transition: background 0.25s ease;
 }
 .tab-btn {
   padding: 14px 18px; background: none; border: none; cursor: pointer;
-  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--gris-500);
+  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--text-muted);
   border-bottom: 3px solid transparent; transition: all 0.2s;
   display: flex; align-items: center; gap: 8px; white-space: nowrap;
 }
-.tab-btn:hover { color: var(--azul-700); }
-.tab-btn.active { color: var(--azul-700); border-bottom-color: var(--azul-600); }
+.tab-btn:hover { color: var(--accent-text); }
+.tab-btn.active { color: var(--accent-text); border-bottom-color: var(--accent); }
 
 main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .tab-content { display: none; animation: fadeIn 0.3s ease; }
@@ -226,7 +338,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   gap: 16px; margin-bottom: 24px;
 }
 .kpi-card {
-  background: white; border-radius: var(--radius); padding: 20px;
+  background: var(--card); border-radius: var(--radius); padding: 20px;
   box-shadow: var(--shadow); border: 1px solid var(--gris-100);
   position: relative; overflow: hidden;
 }
@@ -251,7 +363,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
 .card {
-  background: white; border-radius: var(--radius); padding: 20px;
+  background: var(--card); border-radius: var(--radius); padding: 20px;
   box-shadow: var(--shadow); border: 1px solid var(--gris-100);
 }
 .card-header {
@@ -296,10 +408,10 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .urg-item .info .sub { color: var(--gris-600); font-size: 12px; margin-top: 2px; }
 .urg-item .dias {
   font-family: 'Bebas Neue'; font-size: 24px; line-height: 1;
-  color: var(--gris-700); padding: 4px 12px; background: white; border-radius: 6px;
+  color: var(--gris-700); padding: 4px 12px; background: var(--card); border-radius: 6px;
   min-width: 60px; text-align: center;
 }
-.urg-item.vencido .dias { color: var(--gris-900); background: white; }
+.urg-item.vencido .dias { color: var(--gris-900); background: var(--card); }
 .urg-item.critico .dias, .urg-item.urgente .dias { color: var(--rojo-700); }
 
 /* ═══════ BADGES ═══════ */
@@ -331,7 +443,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   gap: 16px;
 }
 .cliente-card {
-  background: white; border-radius: var(--radius); padding: 18px;
+  background: var(--card); border-radius: var(--radius); padding: 18px;
   box-shadow: var(--shadow); border: 1px solid var(--gris-100);
   cursor: pointer; transition: all 0.2s;
 }
@@ -358,7 +470,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 
 /* ═══════ EQUIPOS LISTA ═══════ */
 .equipo-card {
-  background: white; border-radius: var(--radius); padding: 18px;
+  background: var(--card); border-radius: var(--radius); padding: 18px;
   box-shadow: var(--shadow); border: 1px solid var(--gris-100); margin-bottom: 12px;
 }
 .equipo-card.es-suelto {
@@ -390,7 +502,28 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   padding: 12px; background: var(--gris-50); border-radius: var(--radius-sm);
   border-left: 4px solid var(--gris-300);
   display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: all 0.15s ease;
+  position: relative;
 }
+.consumible-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background: var(--card);
+}
+.consumible-tile::after {
+  content: '›'; position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px; color: var(--gris-400); font-weight: 300;
+  opacity: 0; transition: all 0.15s ease;
+}
+.consumible-tile:hover::after {
+  opacity: 1; right: 8px;
+}
+.consumible-tile:hover .badge {
+  filter: brightness(1.05);
+  transform: scale(1.05);
+}
+.consumible-tile .badge { transition: all 0.15s ease; }
 .consumible-tile.vigente { border-left-color: var(--verde-500); }
 .consumible-tile.atencion { border-left-color: var(--amarillo-500); background: #FEFCE8; }
 .consumible-tile.proximo { border-left-color: var(--naranja-500); background: #FFF7ED; }
@@ -426,7 +559,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 }
 .stock-table {
   width: 100%; border-collapse: separate; border-spacing: 0;
-  background: white; border-radius: var(--radius); overflow: hidden;
+  background: var(--card); border-radius: var(--radius); overflow: hidden;
   box-shadow: var(--shadow);
 }
 .stock-table th, .stock-table td {
@@ -470,7 +603,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   padding: 20px; animation: fadeIn 0.2s;
 }
 .modal {
-  background: white; border-radius: var(--radius-lg); max-width: 560px; width: 100%;
+  background: var(--card); border-radius: var(--radius-lg); max-width: 560px; width: 100%;
   max-height: 90vh; overflow-y: auto;
   box-shadow: var(--shadow-lg); animation: slideUp 0.25s;
 }
@@ -513,7 +646,7 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   animation: fadeIn 0.15s ease;
 }
 #loadingOverlay .box {
-  background: white; padding: 28px 36px; border-radius: var(--radius-lg);
+  background: var(--card); padding: 28px 36px; border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg); text-align: center;
   min-width: 260px; max-width: 380px;
 }
@@ -584,6 +717,12 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
       <span class="dot"></span>
     </div>
     <div class="user-info">
+      <div class="theme-switcher">
+        <button class="theme-btn" data-theme="claro" onclick="setTheme('claro')" title="Tema claro">☀️</button>
+        <button class="theme-btn" data-theme="oscuro" onclick="setTheme('oscuro')" title="Tema oscuro">🌙</button>
+        <button class="theme-btn" data-theme="auto" onclick="setTheme('auto')" title="Automático según el sistema">⚙️</button>
+        <button class="theme-btn" data-theme="verde" onclick="setTheme('verde')" title="Tema verde">🌿</button>
+      </div>
       <button class="btn-refresh" onclick="refrescarManual()" title="Recargar datos">🔄 Actualizar</button>
       <div class="avatar" id="userAvatar">–</div>
       <div>
@@ -710,8 +849,75 @@ const state = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API
+// TEMAS (Claro / Oscuro / Auto / Verde)
 // ═══════════════════════════════════════════════════════════════════════════
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('biomed_theme', theme);
+  // Actualizar botones activos
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.theme === theme);
+  });
+  // Actualizar meta theme-color para la barra del navegador (PWA)
+  const metaColor = document.querySelector('meta[name="theme-color"]');
+  if (metaColor) {
+    const colors = { claro: '#0F172A', oscuro: '#0A0F1C', verde: '#064E3B', auto: '#0F172A' };
+    metaColor.setAttribute('content', colors[theme] || '#0F172A');
+  }
+}
+
+// Cargar tema guardado al iniciar (se ejecuta antes del login)
+(function initTheme() {
+  const saved = localStorage.getItem('biomed_theme') || 'claro';
+  document.documentElement.setAttribute('data-theme', saved);
+  // Marcar el botón activo una vez que el DOM esté listo
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === saved);
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ICONOS SVG DE CONSUMIBLES (profesionales, sin emojis)
+// ═══════════════════════════════════════════════════════════════════════════
+function iconConsumible(tipo, size) {
+  size = size || 28;
+  const s = size;
+  const svgBase = `width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
+
+  if (tipo === 'bateria') {
+    return `<svg ${svgBase}>
+      <rect x="3" y="8" width="15" height="10" rx="1.5"/>
+      <path d="M21 11v4"/>
+      <line x1="7" y1="13" x2="7" y2="13.01"/>
+      <line x1="10.5" y1="13" x2="10.5" y2="13.01"/>
+      <line x1="14" y1="13" x2="14" y2="13.01"/>
+    </svg>`;
+  }
+
+  if (tipo === 'electrodo-pediatrico') {
+    // Electrodo con silueta pequeña + símbolo niño
+    return `<svg ${svgBase}>
+      <rect x="3" y="6" width="18" height="14" rx="2"/>
+      <circle cx="12" cy="11" r="1.5"/>
+      <path d="M9.5 14.5 Q12 17 14.5 14.5"/>
+      <path d="M2 4 L4 6 M20 6 L22 4"/>
+    </svg>`;
+  }
+
+  // Default: electrodo adulto (rectángulo con forma de pad + símbolo rayo pequeño adentro)
+  return `<svg ${svgBase}>
+    <rect x="3" y="4" width="18" height="16" rx="2.5"/>
+    <path d="M11 8 L9 13 L12 13 L10 17 L14 11 L11 11 L13 8 Z" fill="currentColor" stroke="none"/>
+  </svg>`;
+}
+
+function badgeConsumible(c) {
+  if (c.diasRestantes === null || c.diasRestantes === undefined) return '-';
+  if (c.diasRestantes < 0) return 'VENC';
+  return c.diasRestantes + 'd';
+}
 async function api(action, params = {}) {
   const formData = new FormData();
   formData.append('payload', JSON.stringify({ action, params }));
@@ -783,7 +989,6 @@ async function entrarApp() {
   document.getElementById('userName').textContent = u.nombre;
   document.getElementById('userRol').textContent = u.rol === 'super_admin' ? 'Super Admin' : 'Admin';
   document.getElementById('userAvatar').textContent = (u.nombre || u.usuario).substring(0, 2).toUpperCase();
-  showLoading('Cargando datos', 'Trayendo clientes, equipos y consumibles...');
   await cargarDataInicial();
   hideLoading();
 }
@@ -881,7 +1086,7 @@ function renderDashboard() {
   } else {
     ul.innerHTML = d.topUrgencias.map(u => `
       <div class="urg-item ${u.estado}">
-        <div class="emoji">${u.emoji || '📦'}</div>
+        <div class="emoji">${iconConsumible(u.tipoIcono, 24)}</div>
         <div class="info">
           <div class="name">${u.nombreCorto} · ${u.cliente}</div>
           <div class="sub">${u.equipoModelo || ''} · S/N ${u.numeroSerie || '-'}</div>
@@ -898,7 +1103,7 @@ function renderDashboard() {
   } else {
     sa.innerHTML = d.stockBajo.map(s => `
       <div class="urg-item ${s.estadoStock === 'agotado' ? 'urgente' : 'proximo'}">
-        <div class="emoji">${s.emoji || '📦'}</div>
+        <div class="emoji">${iconConsumible(s.tipoIcono, 24)}</div>
         <div class="info">
           <div class="name">${s.nombreCorto} · ${s.CodigoZOLL}</div>
           <div class="sub">Stock: ${s.StockActual} / Mínimo: ${s.StockMinimo}</div>
@@ -992,7 +1197,7 @@ function renderEquipos() {
           '<div style="padding:16px; color: var(--gris-500); font-size:13px; font-style:italic;">Sin consumibles cargados</div>' :
           e.consumibles.map(c => `
             <div class="consumible-tile ${c.estado}" onclick="verConsumible('${c.ID}', '${e.ID}')">
-              <div class="emoji">${c.emoji || '📦'}</div>
+              <div class="emoji">${iconConsumible(c.tipoIcono)}</div>
               <div class="txt">
                 <div class="name">${c.nombreCorto || c.CodigoZOLL}</div>
                 <div class="venc">${c.FechaVencimiento ? 'Vencimiento: ' + formatFecha(c.FechaVencimiento) : 'Sin fecha'}</div>
@@ -1018,7 +1223,7 @@ function renderStock() {
     const pct = s.StockMinimo > 0 ? Math.min(100, (s.StockActual / (s.StockMinimo * 3)) * 100) : 100;
     return `
       <tr>
-        <td><strong>${s.emoji || '📦'} ${s.nombreCorto || s.Descripcion}</strong><br><small style="color:var(--gris-500);">${s.Descripcion}</small></td>
+        <td><div style="display:flex; align-items:center; gap:8px;"><span style="color: var(--azul-700);">${iconConsumible(s.tipoIcono, 22)}</span><div><strong>${s.nombreCorto || s.Descripcion}</strong><br><small style="color:var(--gris-500);">${s.Descripcion}</small></div></div></td>
         <td><code class="mono">${s.CodigoZOLL}</code></td>
         <td><span style="font-family:'Bebas Neue'; font-size:24px;">${s.StockActual}</span></td>
         <td>
@@ -1270,7 +1475,7 @@ function abrirModalConsumible(opts) {
 
   const catalogoOpts = Object.keys(state.catalogo).map(cod => {
     const c = state.catalogo[cod];
-    return `<option value="${cod}">${c.emoji} ${c.nombre} (${cod})</option>`;
+    return `<option value="${cod}">${c.nombre} (${cod})</option>`;
   }).join('');
 
   const clientesOpts = '<option value="">-- Seleccionar cliente --</option>' +
@@ -1456,7 +1661,7 @@ async function guardarConsumible() {
     </div>
     <div class="modal-body">
       <div style="background: var(--verde-50); padding: 16px; border-radius: var(--radius-sm); border-left: 4px solid var(--verde-500); margin-bottom: 16px;">
-        <div style="font-size: 28px; margin-bottom: 4px;">${cat.emoji}</div>
+        <div style="color: var(--verde-600); margin-bottom: 8px;">${iconConsumible(cat.tipoIcono, 36)}</div>
         <div style="font-weight: 700; color: var(--gris-900); font-size: 15px;">${cat.nombre}</div>
         <div style="font-size: 12px; color: var(--gris-600); margin-top: 2px;"><code class="mono">${codigoZOLL}</code>${params.lote ? ' · Lote: ' + params.lote : ''}</div>
       </div>
@@ -1510,7 +1715,7 @@ function verConsumible(id, equipoOSueltoID) {
 
   showModal(`
     <div class="modal-header">
-      <h3>${cat.emoji || '📦'} ${cat.nombre || c.CodigoZOLL}</h3>
+      <h3 style="display:flex; align-items:center; gap:10px;"><span style="color: var(--azul-700);">${iconConsumible(cat.tipoIcono, 28)}</span>${cat.nombre || c.CodigoZOLL}</h3>
       <button class="close-btn" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
